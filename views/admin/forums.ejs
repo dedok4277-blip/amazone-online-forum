@@ -1,0 +1,56 @@
+<div class="admin-layout">
+  <%- include('_sidebar') %>
+  <div class="admin-content">
+    <h1>Форумы</h1>
+
+    <div class="admin-form-box">
+      <h2>Добавить форум</h2>
+      <form action="/admin/forums/create" method="POST" class="inline-form">
+        <select name="category_id" required>
+          <option value="">— Категория —</option>
+          <% for (const c of categories) { %>
+            <option value="<%= c.id %>"><%= c.name %></option>
+          <% } %>
+        </select>
+        <input type="text" name="name" placeholder="Название" required>
+        <input type="text" name="description" placeholder="Описание">
+        <input type="number" name="display_order" placeholder="Порядок" value="0" style="width:80px">
+        <button type="submit" class="btn-primary">Добавить</button>
+      </form>
+    </div>
+
+    <table class="admin-table">
+      <thead>
+        <tr><th>#</th><th>Название</th><th>Категория</th><th>Тредов</th><th>Постов</th><th>Действия</th></tr>
+      </thead>
+      <tbody>
+        <% for (const f of forums) { %>
+          <tr>
+            <td><%= f.id %></td>
+            <td>
+              <form action="/admin/forums/<%= f.id %>/edit" method="POST" class="inline-edit-form">
+                <select name="category_id">
+                  <% for (const c of categories) { %>
+                    <option value="<%= c.id %>" <%= f.category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+                  <% } %>
+                </select>
+                <input type="text" name="name" value="<%= f.name %>" required>
+                <input type="text" name="description" value="<%= f.description || '' %>">
+                <input type="number" name="display_order" value="<%= f.display_order %>" style="width:60px">
+                <button type="submit" class="btn-xs">Сохранить</button>
+              </form>
+            </td>
+            <td><%= f.category_name %></td>
+            <td><%= f.thread_count %></td>
+            <td><%= f.post_count %></td>
+            <td>
+              <form action="/admin/forums/<%= f.id %>/delete" method="POST" onsubmit="return confirm('Удалить?')" style="display:inline">
+                <button class="btn-xs btn-danger"><i class="fa fa-trash"></i></button>
+              </form>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

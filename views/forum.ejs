@@ -1,0 +1,127 @@
+<div class="breadcrumb">
+  <a href="/">Главная</a>
+  <span class="sep">»</span>
+  <span><%= forum.category_name %></span>
+  <span class="sep">»</span>
+  <span><%= forum.name %></span>
+</div>
+
+<div class="page-title-bar">
+  <h1><%= forum.name %></h1>
+  <div class="page-title-actions">
+    <% if (currentUser) { %>
+      <a href="/thread/new/<%= forum.id %>" class="btn-primary"><i class="fa fa-pen-to-square"></i> Создать тему</a>
+    <% } %>
+    <% if (currentUser && currentUser.perms && currentUser.perms.canManageForums) { %>
+      <button class="btn-secondary" id="toggle-subforum-form" onclick="document.getElementById('subforum-form-box').classList.toggle('hidden')">
+        <i class="fa fa-plus"></i> Создать подфорум
+      </button>
+    <% } %>
+  </div>
+</div>
+
+<% if (currentUser && currentUser.perms && currentUser.perms.canManageForums) { %>
+<div class="subforum-form-box hidden" id="subforum-form-box">
+  <div class="subforum-form-title"><i class="fa fa-folder-plus"></i> Новый подфорум в «<%= forum.name %>»</div>
+  <form action="/admin/forums/create" method="POST" class="subforum-form">
+    <input type="hidden" name="category_id" value="<%= forum.category_id %>">
+    <input type="hidden" name="parent_forum_id" value="<%= forum.id %>">
+    <input type="text" name="name" placeholder="Название подфорума" required class="subforum-input">
+    <input type="text" name="description" placeholder="Описание (необязательно)" class="subforum-input">
+    <input type="number" name="display_order" placeholder="Порядок" value="0" class="subforum-input subforum-input-sm">
+    <button type="submit" class="btn-primary"><i class="fa fa-plus"></i> Создать</button>
+  </form>
+</div>
+<% } %>
+
+<% if (typeof subforums !== 'undefined' && subforums.length > 0) { %>
+<div class="category-block" style="margin-bottom:16px">
+  <div class="category-header">
+    <h2><i class="fa fa-folder-open" style="margin-right:7px;color:var(--accent)"></i>Подфорумы</h2>
+  </div>
+  <% const icons = ['fi-orange','fi-green','fi-blue','fi-purple','fi-teal','fi-red','fi-gray']; %>
+  <% subforums.forEach((sf, i) => { %>
+    <div class="forum-row">
+      <div class="forum-icon-box <%= icons[i % icons.length] %>">
+        <i class="fa fa-comments"></i>
+      </div>
+      <div class="forum-info">
+        <a href="/forum/<%= sf.id %>" class="forum-name"><%= sf.name %></a>
+        <% if (sf.description) { %><div class="forum-desc"><%= sf.description %></div><% } %>
+      </div>
+      <div class="forum-count">
+        <span class="num"><%= sf.thread_count %></span>
+        <span class="lbl">Темы</span>
+      </div>
+      <div class="forum-last">
+        <% if (sf.last_thread_id) { %>
+          <a href="/thread/<%= sf.last_thread_id %>" class="last-thread-link"><%= sf.last_thread_title ? sf.last_thread_title.substring(0,45)+'…' : '—' %></a>
+          <div class="last-meta">
+            <% if (sf.last_post_at) { %><%= new Date(sf.last_post_at).toLocaleDateString('ru') %><% } %>
+            <% if (sf.last_post_user) { %><span><%= sf.last_post_user %></span><% } %>
+          </div>
+        <% } else { %>
+          <span class="muted" style="font-size:12px">Нет</span>
+        <% } %>
+      </div>
+    </div>
+  <% }); %>
+</div>
+<% } %>
+
+<div class="thread-list-wrap">
+  <div class="thread-list-header">
+    <span>Тема</span>
+    <span style="text-align:center">Ответы</span>
+    <span>Последнее сообщение</span>
+  </div>
+
+  <% if (threads.length === 0) { %>
+    <div class="empty-state">
+      <i class="fa fa-comment-slash"></i>
+      <p>Тем пока нет. Создайте первую!</p>
+    </div>
+  <% } %>
+
+  <% for (const t of threads) { %>
+    <div class="thread-row <%= t.is_pinned ? 'pinned' : '' %> <%= t.is_locked ? 'locked' : '' %>">
+      <div class="thread-status-icon">
+        <% if (t.is_pinned) { %>
+          <i class="fa fa-thumbtack" style="color:var(--accent)" title="Закреплено"></i>
+        <% } else if (t.is_locked) { %>
+          <i class="fa fa-lock" title="Закрыто"></i>
+        <% } else { %>
+          <i class="fa-regular fa-comment"></i>
+        <% } %>
+      </div>
+      <div>
+        <a href="/thread/<%= t.id %>" class="thread-title-line"><%= t.title %></a>
+        <div class="thread-meta-line">
+          <a href="/user/<%= t.user_id %>"><%= t.username %></a>
+          &middot; <%= new Date(t.created_at).toLocaleDateString('ru') %>
+        </div>
+      </div>
+      <div class="thread-counts">
+        <span class="num"><%= t.reply_count %></span>
+        <span class="lbl">Ответов</span>
+      </div>
+      <div class="forum-last">
+        <% if (t.last_post_at) { %>
+          <div class="last-meta">
+            <img src="<%= t.last_post_avatar || '/img/default-avatar.svg' %>" class="last-avatar">
+            <%= new Date(t.last_post_at).toLocaleDateString('ru') %>
+            <a href="/user/<%= t.last_post_user_id %>"><%= t.last_post_user %></a>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<% if (totalPages > 1) { %>
+  <div class="pagination">
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="?page=<%= i %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+    <% } %>
+  </div>
+<% } %>

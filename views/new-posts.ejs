@@ -1,0 +1,30 @@
+<div class="page-title-bar">
+  <h1>Новые сообщения</h1>
+</div>
+<div class="thread-list-wrap">
+  <% if (threads.length === 0) { %>
+    <div class="empty-state"><i class="fa fa-comment-slash"></i><p>Нет новых тем</p></div>
+  <% } %>
+  <% for (const t of threads) { %>
+    <div class="thread-row">
+      <div class="thread-status-icon"><i class="fa-regular fa-comment"></i></div>
+      <div>
+        <a href="/thread/<%= t.id %>" class="thread-title-line"><%= t.title %></a>
+        <div class="thread-meta-line">
+          <a href="/forum/<%= t.forum_id %>"><%= t.forum_name %></a> &middot;
+          <a href="/user/<%= t.user_id %>"><%= t.username %></a> &middot;
+          <%= new Date(t.created_at).toLocaleDateString('ru') %>
+        </div>
+      </div>
+      <div class="thread-counts">
+        <span class="num"><%= t.reply_count %></span>
+        <span class="lbl">Ответов</span>
+      </div>
+      <div class="forum-last">
+        <% if (t.last_post_at) { %>
+          <div class="last-meta"><%= new Date(t.last_post_at).toLocaleDateString('ru') %> · <a href="#"><%= t.last_post_user || '—' %></a></div>
+        <% } %>
+      </div>
+    </div>
+  <% } %>
+</div>

@@ -1,0 +1,124 @@
+<div class="two-col">
+
+  <!-- Left: categories -->
+  <div class="category-list">
+    <% if (categories.length === 0) { %>
+      <div class="empty-state">
+        <i class="fa fa-comments"></i>
+        <p>Форум пуст.<% if (currentUser && currentUser.role === 'admin') { %> <a href="/admin/categories">Создайте категорию</a><% } %></p>
+      </div>
+    <% } %>
+
+    <% const icons = ['fi-orange','fi-green','fi-blue','fi-purple','fi-teal','fi-red','fi-gray']; %>
+    <% let iconIdx = 0; %>
+
+    <% for (const cat of categories) { %>
+      <div class="category-block">
+        <div class="category-header">
+          <h2><%= cat.name %></h2>
+          <span class="cat-collapse"><i class="fa fa-minus"></i></span>
+        </div>
+
+        <% if (cat.forums.length === 0) { %>
+          <div class="empty-state" style="padding:16px"><p class="muted">Нет форумов</p></div>
+        <% } %>
+
+        <% for (const forum of cat.forums) { %>
+          <% const ic = icons[iconIdx % icons.length]; iconIdx++; %>
+          <div class="forum-row">
+            <div class="forum-icon-box <%= ic %>">
+              <i class="fa fa-comments"></i>
+            </div>
+            <div class="forum-info">
+              <a href="/forum/<%= forum.id %>" class="forum-name">
+                <%= forum.name %>
+                <span class="badge-new">НОВО</span>
+              </a>
+              <% if (forum.description) { %>
+                <div class="forum-desc"><%= forum.description %></div>
+              <% } %>
+            </div>
+            <div class="forum-count">
+              <span class="num"><%= forum.thread_count %></span>
+              <span class="lbl">Темы</span>
+            </div>
+            <div class="forum-last">
+              <% if (forum.last_thread_id) { %>
+                <a href="/thread/<%= forum.last_thread_id %>" class="last-thread-link"><%= forum.last_thread_title ? forum.last_thread_title.substring(0,45)+'…' : '—' %></a>
+                <div class="last-meta">
+                  <img src="/img/default-avatar.svg" class="last-avatar" alt="">
+                  <% if (forum.last_post_at) { %><%= new Date(forum.last_post_at).toLocaleDateString('ru') %><% } %>
+                  <% if (forum.last_post_user) { %><a href="#"><%= forum.last_post_user %></a><% } %>
+                </div>
+              <% } else { %>
+                <span class="muted" style="font-size:12px">Нет</span>
+              <% } %>
+            </div>
+            <% if (currentUser && currentUser.perms && currentUser.perms.canManageForums) { %>
+              <div class="forum-manage-btns">
+                <a href="/thread/new/<%= forum.id %>" class="btn-forum-create" title="Создать тему">
+                  <i class="fa fa-pen-to-square"></i> Создать тему
+                </a>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Right: sidebar -->
+  <aside class="sidebar">
+
+    <!-- Popular content -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-title">Популярный контент</div>
+      <div class="sidebar-box-body">
+        <% if (popular && popular.length > 0) { %>
+          <% for (const p of popular) { %>
+            <div class="popular-item">
+              <img src="<%= p.avatar || '/img/default-avatar.svg' %>" class="popular-avatar" alt="">
+              <div class="popular-info">
+                <a href="/thread/<%= p.thread_id %>" class="popular-title"><%= p.title %></a>
+                <div class="popular-meta"><%= p.username %> · <%= new Date(p.created_at).toLocaleDateString('ru') %> · Ответы: <%= p.reply_count %></div>
+              </div>
+            </div>
+          <% } %>
+        <% } else { %>
+          <p class="muted" style="font-size:12px">Пока нет активных тем</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Online users -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-title">Пользователи онлайн</div>
+      <div class="sidebar-box-body">
+        <div class="online-list">
+          <% if (onlineUsers && onlineUsers.length > 0) { %>
+            <% for (const u of onlineUsers) { %>
+              <a href="/user/<%= u.id %>" class="online-user"><%= u.username %></a>
+            <% } %>
+          <% } else { %>
+            <span class="muted" style="font-size:12px">Никого нет</span>
+          <% } %>
+        </div>
+        <div class="online-count">Всего: <b><%= stats.total_users %></b> (пользователей: <%= onlineUsers ? onlineUsers.length : 0 %>, гостей: ?)</div>
+      </div>
+    </div>
+
+    <!-- Forum stats -->
+    <div class="sidebar-box">
+      <div class="sidebar-box-title">Статистика форума</div>
+      <div class="sidebar-box-body">
+        <div class="sidebar-stat-row"><span class="lbl">Темы:</span><span class="val"><%= stats.total_threads %></span></div>
+        <div class="sidebar-stat-row"><span class="lbl">Сообщения:</span><span class="val"><%= stats.total_posts %></span></div>
+        <div class="sidebar-stat-row"><span class="lbl">Пользователи:</span><span class="val"><%= stats.total_users %></span></div>
+        <% if (stats.newest_user) { %>
+          <div class="sidebar-stat-row"><span class="lbl">Новый участник:</span><span class="val"><%= stats.newest_user %></span></div>
+        <% } %>
+      </div>
+    </div>
+
+  </aside>
+</div>

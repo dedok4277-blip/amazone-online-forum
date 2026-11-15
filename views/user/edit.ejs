@@ -1,0 +1,37 @@
+<div class="form-page">
+  <h1>Настройки профиля</h1>
+  <form action="/user/<%= profile.id %>/edit" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Аватар</label>
+      <div class="avatar-preview-wrap">
+        <img src="<%= profile.avatar || '/img/default-avatar.svg' %>" class="avatar-lg" id="avatarPreview">
+      </div>
+      <input type="file" name="avatar" accept="image/*" id="avatarInput">
+    </div>
+    <div class="form-group">
+      <label>Подпись</label>
+      <input type="text" name="signature" value="<%= profile.signature || '' %>" maxlength="200">
+    </div>
+    <hr>
+    <h3>Сменить пароль</h3>
+    <div class="form-group">
+      <label>Новый пароль</label>
+      <input type="password" name="password" minlength="6" placeholder="Оставьте пустым, чтобы не менять">
+    </div>
+    <div class="form-group">
+      <label>Повторите пароль</label>
+      <input type="password" name="password2" minlength="6">
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary"><i class="fa fa-floppy-disk"></i> Сохранить</button>
+      <a href="/user/<%= profile.id %>" class="btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
+<script>
+  document.getElementById('avatarInput').addEventListener('change', function() {
+    const reader = new FileReader();
+    reader.onload = e => document.getElementById('avatarPreview').src = e.target.result;
+    if (this.files[0]) reader.readAsDataURL(this.files[0]);
+  });
+</script>

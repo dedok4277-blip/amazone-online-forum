@@ -1,0 +1,138 @@
+<div class="breadcrumb">
+  <a href="/">Главная</a>
+  <span class="sep">»</span>
+  <a href="/forum/<%= thread.forum_id %>"><%= thread.forum_name %></a>
+  <span class="sep">»</span>
+  <span><%= thread.title %></span>
+</div>
+
+<div class="page-title-bar">
+  <h1>
+    <% if (thread.is_pinned) { %><i class="fa fa-thumbtack" style="color:var(--accent);font-size:.8em"></i> <% } %>
+    <% if (thread.is_locked) { %><i class="fa fa-lock" style="font-size:.8em"></i> <% } %>
+    <%= thread.title %>
+  </h1>
+  <div class="page-title-actions">
+    <% if (currentUser && currentUser.perms && currentUser.perms.canModerateThreads) { %>
+      <form action="/thread/<%= thread.id %>/pin"  method="POST" style="display:inline">
+        <button class="btn-sm"><i class="fa fa-thumbtack"></i> <%= thread.is_pinned ? 'Открепить' : 'Закрепить' %></button>
+      </form>
+      <form action="/thread/<%= thread.id %>/lock" method="POST" style="display:inline">
+        <button class="btn-sm"><i class="fa fa-lock"></i> <%= thread.is_locked ? 'Открыть' : 'Закрыть' %></button>
+      </form>
+    <% } %>
+    <% if (currentUser && currentUser.perms && currentUser.perms.canDeleteThreads) { %>
+      <form action="/thread/<%= thread.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить тред?')">
+        <button class="btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<div class="posts-list">
+  <% for (let pi = 0; pi < posts.length; pi++) { %>
+    <% const post = posts[pi]; %>
+    <div class="post-card" id="post-<%= post.id %>">
+      <!-- post header -->
+      <div class="post-card-header">
+        <span class="post-date muted"><%= new Date(post.created_at).toLocaleString('ru') %></span>
+        <div class="post-badges">
+          <% if (post.user_id === thread.user_id) { %>
+            <span class="badge-author">Тема Автор</span>
+          <% } %>
+          <% if (pi === 0 && page === 1) { %>
+            <span class="badge-new-post">Новое</span>
+          <% } %>
+          <% if (currentUser && (currentUser.id === post.user_id || (currentUser.perms && currentUser.perms.canEditPosts))) { %>
+            <a href="/post/<%= post.id %>/edit" class="btn-xs"><i class="fa fa-pen"></i></a>
+            <form action="/post/<%= post.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить?')">
+              <button class="btn-xs btn-danger"><i class="fa fa-trash"></i></button>
+            </form>
+          <% } %>
+          <span class="post-num muted">#<%= (page-1)*15 + pi + 1 %></span>
+        </div>
+      </div>
+
+      <!-- post body -->
+      <div class="post-body">
+        <div class="post-author-col">
+          <a href="/user/<%= post.user_id %>">
+            <img src="<%= post.avatar || '/img/default-avatar.svg' %>" class="avatar" alt="<%= post.username %>">
+          </a>
+          <a href="/user/<%= post.user_id %>" class="post-author-name"><%= post.username %></a>
+          <span class="user-role role-<%= post.role %>"><%= post.roleLabel || post.role %></span>
+          <div class="post-author-stats">Сообщений: <%= post.post_count %></div>
+        </div>
+
+        <div class="post-content-col">
+          <div class="post-content"><%- post.content.replace(/\n/g, '<br>') %></div>
+          <% if (post.signature) { %>
+            <div class="post-signature"><%= post.signature %></div>
+          <% } %>
+          <div class="post-footer">
+            <% if (currentUser) { %>
+              <button class="like-btn <%= likedPosts.includes(post.id) ? 'liked' : '' %>" data-post-id="<%= post.id %>">
+                <i class="fa fa-heart"></i>
+                <span class="like-count"><%= post.like_count %></span>
+              </button>
+            <% } else { %>
+              <span class="like-static"><i class="fa fa-heart"></i> <%= post.like_count %></span>
+            <% } %>
+            <% if (currentUser && !thread.is_locked) { %>
+              <button class="btn-xs quote-btn" data-username="<%= post.username %>" data-content="<%= post.content.replace(/"/g,'&quot;').replace(/\n/g,'&#10;') %>">
+                <i class="fa fa-quote-left"></i> Цитата
+              </button>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<% if (totalPages > 1) { %>
+  <div class="pagination">
+    <% for (let i = 1; i <= totalPages; i++) { %>
+      <a href="?page=<%= i %>" class="<%= i === page ? 'active' : '' %>"><%= i %></a>
+    <% } %>
+  </div>
+<% } %>
+
+<% if (currentUser && !thread.is_locked) { %>
+  <div class="reply-box" id="reply-form">
+    <div class="reply-box-inner">
+      <div class="reply-avatar-col">
+        <img src="<%= currentUser.avatar || '/img/default-avatar.svg' %>" alt="">
+      </div>
+      <div class="reply-editor-col">
+        <form action="/post/reply/<%= thread.id %>" method="POST">
+          <div class="editor-toolbar">
+            <button type="button" title="Жирный"><i class="fa fa-bold"></i></button>
+            <button type="button" title="Курсив"><i class="fa fa-italic"></i></button>
+            <button type="button" title="Подчёркнутый"><i class="fa fa-underline"></i></button>
+            <div class="sep"></div>
+            <button type="button" title="Список"><i class="fa fa-list-ul"></i></button>
+            <button type="button" title="Выравнивание"><i class="fa fa-align-left"></i></button>
+            <div class="sep"></div>
+            <button type="button" title="Ссылка"><i class="fa fa-link"></i></button>
+            <button type="button" title="Изображение"><i class="fa fa-image"></i></button>
+            <button type="button" title="Смайл"><i class="fa fa-face-smile"></i></button>
+            <div class="sep"></div>
+            <button type="button" title="Отменить"><i class="fa fa-rotate-left"></i></button>
+            <button type="button" title="Повторить"><i class="fa fa-rotate-right"></i></button>
+            <button type="button" class="preview-btn"><i class="fa fa-eye"></i> Предпросмотр</button>
+          </div>
+          <textarea name="content" id="reply-content" placeholder="Напишите свой ответ…" required></textarea>
+          <div class="reply-box-footer">
+            <button type="button" class="attach-btn"><i class="fa fa-paperclip"></i> Прикрепить файлы</button>
+            <button type="submit" class="btn-primary"><i class="fa fa-reply"></i> Ответить</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+<% } else if (thread.is_locked) { %>
+  <div class="alert alert-info" style="margin-top:14px"><i class="fa fa-lock"></i> Тред закрыт для ответов.</div>
+<% } else { %>
+  <div class="alert alert-info" style="margin-top:14px"><a href="/auth/login">Войдите</a>, чтобы ответить.</div>
+<% } %>

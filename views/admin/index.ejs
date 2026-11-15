@@ -1,0 +1,36 @@
+<div class="admin-layout">
+  <%- include('_sidebar') %>
+  <div class="admin-content">
+    <h1>Панель администратора</h1>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <i class="fa fa-users fa-2x"></i>
+        <div>
+          <span class="stat-num"><%= stats.total_users %></span>
+          <span class="stat-label">Пользователей</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fa fa-list fa-2x"></i>
+        <div>
+          <span class="stat-num"><%= stats.total_threads %></span>
+          <span class="stat-label">Тредов</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fa fa-message fa-2x"></i>
+        <div>
+          <span class="stat-num"><%= stats.total_posts %></span>
+          <span class="stat-label">Сообщений</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="fa fa-layer-group fa-2x"></i>
+        <div>
+          <span class="stat-num"><%= stats.total_categories %></span>
+          <span class="stat-label">Категорий</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

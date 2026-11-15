@@ -1,0 +1,73 @@
+<div class="breadcrumb">
+  <a href="/">Главная</a> <span class="sep">»</span>
+  <a href="/members">Пользователи</a> <span class="sep">»</span>
+  <span>profile <%= profile.username %></span>
+</div>
+
+<div class="profile-card">
+  <div class="profile-banner">
+    <% if (profile.banner) { %>
+      <img src="<%= profile.banner %>" alt="">
+    <% } %>
+  </div>
+  <div class="profile-card-body">
+    <div class="profile-avatar-wrap">
+      <img src="<%= profile.avatar || '/img/default-avatar.svg' %>" alt="<%= profile.username %>">
+    </div>
+    <div class="profile-info">
+      <h1>
+        <%= profile.username %>
+        <span class="user-role role-<%= profile.role %>"><%= roleInfo.label %></span>
+      </h1>
+      <div class="profile-id"><i class="fa fa-hashtag"></i> ID: <%= profile.id %></div>
+      <div class="profile-role-badge" style="margin-top:2px"><%= roleInfo.label %></div>
+      <div class="profile-counters">
+        <div class="profile-counter"><a href="#"><i class="fa fa-comment"></i> <b><%= profile.post_count %></b> Сообщение</a></div>
+        <div class="profile-counter"><a href="#"><i class="fa fa-check-circle"></i> <b>0</b> Решения</a></div>
+        <div class="profile-counter"><a href="#"><i class="fa fa-heart"></i> <b>0</b> Реакции</a></div>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <% if (currentUser && currentUser.id !== profile.id) { %>
+        <button class="btn-secondary"><i class="fa fa-comment"></i> Написать</button>
+      <% } %>
+      <% if (currentUser && (currentUser.id === profile.id || roleInfo.perms.canEditPosts)) { %>
+        <a href="/user/<%= profile.id %>/edit" class="btn-secondary"><i class="fa fa-gear"></i></a>
+      <% } %>
+    </div>
+  </div>
+  <div class="profile-meta">
+    <span class="profile-meta-item"><i class="fa fa-calendar"></i> Регистрация в <%= new Date(profile.created_at).toLocaleDateString('ru',{month:'short',year:'numeric'}) %></span>
+    <span class="profile-meta-item"><i class="fa fa-clock"></i> Был тут <%= new Date(profile.last_seen || profile.created_at).toLocaleDateString('ru') %></span>
+  </div>
+  <% if (profile.role !== 'member') { %>
+    <div class="profile-tag"><%= roleInfo.label %></div>
+  <% } %>
+</div>
+
+<!-- Status update bar -->
+<% if (currentUser && currentUser.id === profile.id) { %>
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:10px;color:var(--text-muted);font-size:13px;">
+    <i class="fa fa-paperclip"></i>
+    <input type="text" placeholder="Обновить свой статус…" style="background:none;border:none;color:var(--text-muted);font-size:13px;flex:1;outline:none;">
+  </div>
+<% } %>
+
+<!-- Recent posts -->
+<div class="sidebar-box">
+  <div class="sidebar-box-title">Последние сообщения</div>
+  <div class="sidebar-box-body">
+    <% if (recentPosts.length === 0) { %>
+      <p class="muted" style="font-size:12px">Нет сообщений</p>
+    <% } %>
+    <% for (const p of recentPosts) { %>
+      <div class="popular-item">
+        <div class="popular-info">
+          <a href="/thread/<%= p.thread_id %>" class="popular-title"><%= p.thread_title %></a>
+          <div class="popular-meta"><%= p.content.substring(0,100) %><%= p.content.length > 100 ? '…' : '' %></div>
+          <div class="popular-meta"><%= new Date(p.created_at).toLocaleString('ru') %></div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

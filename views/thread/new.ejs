@@ -1,0 +1,33 @@
+<div class="breadcrumb">
+  <a href="/">Главная</a> <span class="sep">»</span>
+  <a href="/forum/<%= forum.id %>"><%= forum.name %></a> <span class="sep">»</span>
+  <span>Новая тема</span>
+</div>
+
+<div class="form-page">
+  <h1><i class="fa fa-pen-to-square"></i> Создать новую тему</h1>
+  <form action="/thread/new/<%= forum.id %>" method="POST">
+    <div class="form-group">
+      <label>Заголовок темы</label>
+      <input type="text" name="title" placeholder="Введите заголовок…" required maxlength="255">
+    </div>
+    <div class="form-group">
+      <label>Текст сообщения</label>
+      <div class="editor-toolbar" style="border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none">
+        <button type="button"><i class="fa fa-bold"></i></button>
+        <button type="button"><i class="fa fa-italic"></i></button>
+        <button type="button"><i class="fa fa-underline"></i></button>
+        <div class="sep"></div>
+        <button type="button"><i class="fa fa-list-ul"></i></button>
+        <button type="button"><i class="fa fa-link"></i></button>
+        <button type="button"><i class="fa fa-image"></i></button>
+      </div>
+      <textarea name="content" rows="12" placeholder="Текст сообщения…" required
+        style="border-radius:0 0 var(--radius) var(--radius);border-top:none"></textarea>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn-primary"><i class="fa fa-paper-plane"></i> Опубликовать</button>
+      <a href="/forum/<%= forum.id %>" class="btn-secondary">Отмена</a>
+    </div>
+  </form>
+</div>
