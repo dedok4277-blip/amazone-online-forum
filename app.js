@@ -5,8 +5,9 @@ const session        = require('express-session');
 const methodOverride = require('method-override');
 const compression    = require('compression');
 const path           = require('path');
-const { testConnection } = require('./db/database');
+const { testConnection, getPool } = require('./db/database');
 const { createSchema }   = require('./db/schema');
+const MySQLStore = require('express-mysql-session')(session);
 const { getRoleInfo, ROLE_LABELS } = require('./middleware/auth');
 
 const authRoutes   = require('./routes/auth');
@@ -44,13 +45,23 @@ app.use(express.json());
 app.use(methodOverride('_method'));
 
 // Session
+const sessionStore = new MySQLStore({
+  expiration:          7 * 24 * 60 * 60 * 1000,
+  createDatabaseTable: true,
+  schema: {
+    tableName:    'sessions',
+    columnNames: { session_id: 'session_id', expires: 'expires', data: 'data' },
+  },
+}, getPool());
+
 app.use(session({
   secret:            process.env.SESSION_SECRET || 'secret',
   resave:            false,
   saveUninitialized: false,
+  store:             sessionStore,
   cookie: {
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    secure: process.env.NODE_ENV === 'production',
+    maxAge:   7 * 24 * 60 * 60 * 1000,
+    secure:   process.env.NODE_ENV === 'production',
     sameSite: 'lax',
   },
 }));
